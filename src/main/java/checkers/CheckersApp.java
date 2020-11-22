@@ -18,8 +18,8 @@ public class CheckersApp extends Application {
     private Group tileGroup = new Group();
     private Group pieceGroup = new Group();
 
-    Player playerW = new Player(PlayerType.WHITE, PieceType.WHITE, false);
-    Player playerR = new Player(PlayerType.RED, PieceType.RED, false);
+    Player playerW = new Player(PlayerType.WHITE, false);
+    Player playerR = new Player(PlayerType.RED, false);
 
     MoveCounter moveCounter = new MoveCounter(0);
 
@@ -61,6 +61,12 @@ public class CheckersApp extends Application {
         int y0 = toBoard(piece.getOldY());
         System.out.println(moveCounter);
 
+        if (pieceGroup.getChildren().contains(piece.getType().WHITE)){
+            System.out.println("Red Win!");
+        }else if (pieceGroup.getChildren().contains(piece.getType().RED)){
+            System.out.println("White Win!");
+        }
+
         if (moveCounter.getMoveCounter() % 2 == 0) {
             playerW.setTurn(true);
             playerR.setTurn(false);
@@ -79,21 +85,68 @@ public class CheckersApp extends Application {
             return new MoveResult(MoveType.NONE);
         }
 
+        int x1 = x0 + (newX - x0) / 2;
+        int y1 = y0 + (newY - y0) / 2;
+
         if (Math.abs(newX - x0) == 1 && newY - y0 == piece.getType().moveDir) {
             moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
             return new MoveResult(MoveType.NORMAL);
 
         } else if (Math.abs(newX - x0) == 2 && newY - y0 == piece.getType().moveDir * 2) {
-
-            int x1 = x0 + (newX - x0) / 2;
-            int y1 = y0 + (newY - y0) / 2;
-
+            if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != piece.getType()) {
+                moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+                return new MoveResult(MoveType.KILL, board[x1][y1].getPiece());
+            }
+        }else if (Math.abs(newX - x0) == 2 && newY - y0 == -piece.getType().moveDir * 2) {
             if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != piece.getType()) {
                 moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
                 return new MoveResult(MoveType.KILL, board[x1][y1].getPiece());
             }
         }
+        return new MoveResult(MoveType.NONE);
+    }
+    private MoveResult tryMoveQ(PieceQ pieceQ, int newX, int newY) {
 
+        int x0 = toBoard(pieceQ.getOldX());
+        int y0 = toBoard(pieceQ.getOldY());
+        System.out.println(moveCounter);
+
+        if (moveCounter.getMoveCounter() % 2 == 0) {
+            playerW.setTurn(true);
+            playerR.setTurn(false);
+        } else if (moveCounter.getMoveCounter() % 2 != 0) {
+            playerW.setTurn(false);
+            playerR.setTurn(true);
+        }
+
+        if (board[newX][newY].hasPiece() || (newX + newY) % 2 == 0) {
+            return new MoveResult(MoveType.NONE);
+        }
+        if (playerW.getTurn() == false && board[x0][y0].getPiece().getType() == pieceQ.getType().WHITE){
+            return new MoveResult(MoveType.NONE);
+        }
+        if (playerR.getTurn() == false && board[x0][y0].getPiece().getType() == pieceQ.getType().RED){
+            return new MoveResult(MoveType.NONE);
+        }
+
+        int x1 = x0 + (newX - x0) / 2;
+        int y1 = y0 + (newY - y0) / 2;
+
+        if (Math.abs(newX - x0) == 1 && newY - y0 == pieceQ.getType().moveDir) {
+            moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+            return new MoveResult(MoveType.NORMAL);
+
+        } else if (Math.abs(newX - x0) == 2 && newY - y0 == pieceQ.getType().moveDir * 2) {
+            if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != pieceQ.getType()) {
+                moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+                return new MoveResult(MoveType.KILL, board[x1][y1].getPiece());
+            }
+        }else if (Math.abs(newX - x0) == 2 && newY - y0 == -pieceQ.getType().moveDir * 2) {
+            if (board[x1][y1].hasPiece() && board[x1][y1].getPiece().getType() != pieceQ.getType()) {
+                moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+                return new MoveResult(MoveType.KILL, board[x1][y1].getPiece());
+            }
+        }
         return new MoveResult(MoveType.NONE);
     }
 
@@ -151,6 +204,49 @@ public class CheckersApp extends Application {
         });
 
         return piece;
+    }
+    private PieceQ makePieceQ(PieceType type, int x, int y) {
+        PieceQ pieceQ = new PieceQ(type, x, y);
+
+        pieceQ.setOnMouseReleased(e -> {
+            int newX = toBoard(pieceQ.getLayoutX());
+            int newY = toBoard(pieceQ.getLayoutY());
+
+            MoveResult result;
+
+            if (newX < 0 || newY < 0 || newX >= WIDTH || newY >= HEIGHT) {
+                result = new MoveResult(MoveType.NONE);
+            } else {
+                result = tryMoveQ(pieceQ, newX, newY);
+            }
+
+            int x0 = toBoard(pieceQ.getOldX());
+            int y0 = toBoard(pieceQ.getOldY());
+
+            switch (result.getType()) {
+                case NONE:
+                    pieceQ.abortMove();
+                    break;
+
+                case NORMAL:
+                    pieceQ.move(newX, newY);
+                    board[x0][y0].setPieceQ(null);
+                    board[newX][newY].setPieceQ(pieceQ);
+                    break;
+
+                case KILL:
+                    pieceQ.move(newX, newY);
+                    board[x0][y0].setPieceQ(null);
+                    board[newX][newY].setPieceQ(pieceQ);
+
+                    Piece otherPiece = result.getPiece();
+                    board[toBoard(otherPiece.getOldX())][toBoard(otherPiece.getOldY())].setPiece(null);
+                    pieceGroup.getChildren().remove(otherPiece);
+                    break;
+            }
+        });
+
+        return pieceQ;
     }
 
     public static void main(String[] args) {
