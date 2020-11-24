@@ -124,51 +124,118 @@ public class CheckersApp extends Application {
                 return new MoveResult(MoveType.TRANSFORM);
             }
         }
+        if (piece.getType() == PieceType.RED_QUIN || piece.getType() == PieceType.WHITE_QUIN) {
+            if (newX + newY == x0 + y0) {
+                if (x0 > newX) {
+                    for (int i = x0 - 1; i > newX; i--) {
+                        int j = x0 + y0 - i;
+                        if (board[i][j].hasPiece()) {
+                            return new MoveResult(MoveType.NONE);
+                        }
+                    }
+                } else if (x0 < newX) {
+                    for (int i = x0 + 1; i < newX; i++) {
+                        int j = x0 + y0 - i;
+                        if (board[i][j].hasPiece()) {
+                            return new MoveResult(MoveType.NONE);
+                        }
+                    }
+                }
+                moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+                return new MoveResult(MoveType.NORMAL);
+            } else if (newX - newY == x0 - y0) {
+                if (x0 > newX) {
+                    for (int i = x0 - 1; i > newX; i--) {
+                        int j = x0 + y0 - i;
+                        if (board[i][j].hasPiece()) {
+                            return new MoveResult(MoveType.NONE);
+                        }
+                    }
+                } else if (x0 < newX) {
+                    for (int i = x0 + 1; i < newX; i++) {
+                        int j = x0 + y0 - i;
+                        if (board[i][j].hasPiece()) {
+                            return new MoveResult(MoveType.NONE);
+                        }
+                    }
+                }
+                moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+                return new MoveResult(MoveType.NORMAL);
+            }
+        }
 
-        if (piece.getType() == PieceType.RED_QUIN || piece.getType() == PieceType.WHITE_QUIN){
+        /*if (piece.getType() == PieceType.RED_QUIN || piece.getType() == PieceType.WHITE_QUIN){
             if (newX + newY == x0 + y0){
                 if (x0 > newX){
                     for (int i = x0 - 1; i > newX; i--){
                         int j = x0 + y0 - i;
-                        if (board[i][j].hasPiece()) {
+                        if (board[i][j].hasPiece() && board[i][j].getPiece().getType() != piece.getType()) {
+                            int k = i - 1;
+                            int l = j + 1;
+                            if (board[k][l].hasPiece()) {
+                                return new MoveResult(MoveType.NONE);
+                            }
+                            moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+                            return new MoveResult(MoveType.KILL, board[i][j].getPiece());
+                        }else if (board[i][j].hasPiece() && board[i][j].getPiece().getType() == piece.getType()) {
                             return new MoveResult(MoveType.NONE);
                         }
                     }
                 }else if(x0 < newX){
                     for (int i = x0 + 1; i < newX; i++){
                         int j = x0 + y0 - i;
-                        if (board[i][j].hasPiece()) {
+                        if (board[i][j].hasPiece() && board[i][j].getPiece().getType() != piece.getType()) {
+                            int k = i + 1;
+                            int l = j - 1;
+                            if (board[k][l].hasPiece()) {
+                                return new MoveResult(MoveType.NONE);
+                            }
+                            moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+                            return new MoveResult(MoveType.KILL, board[i][j].getPiece());
+                        }else if (board[i][j].hasPiece() && board[i][j].getPiece().getType() == piece.getType()) {
                             return new MoveResult(MoveType.NONE);
                         }
                     }
                 }
                 moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
                 return new MoveResult(MoveType.NORMAL);
+
             }else if(newX - newY == x0 - y0){
                 if (x0 > newX){
                     for (int i = x0 - 1; i > newX; i--){
                         int j = x0 + y0 - i;
-                        if (board[i][j].hasPiece()) {
+                        if (board[i][j].hasPiece() && board[i][j].getPiece().getType() != piece.getType()) {
+                            int k = i + 1;
+                            int l = j + 1;
+                            if (board[k][l].hasPiece()) {
+                                return new MoveResult(MoveType.NONE);
+                            }
+                            moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+                            return new MoveResult(MoveType.KILL, board[i][j].getPiece());
+                        }else if (board[i][j].hasPiece() && board[i][j].getPiece().getType() == piece.getType()) {
                             return new MoveResult(MoveType.NONE);
                         }
                     }
                 }else if(x0 < newX){
                     for (int i = x0 + 1; i < newX; i++){
                         int j = x0 + y0 - i;
-                        if (board[i][j].hasPiece()) {
+                        if (board[i][j].hasPiece() && board[i][j].getPiece().getType() != piece.getType()) {
+                            int k = i - 1;
+                            int l = j - 1;
+                            if (board[k][l].hasPiece()) {
+                                return new MoveResult(MoveType.NONE);
+                            }
+                            moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
+                            return new MoveResult(MoveType.KILL, board[i][j].getPiece());
+                        }else if (board[i][j].hasPiece() && board[i][j].getPiece().getType() == piece.getType()) {
                             return new MoveResult(MoveType.NONE);
                         }
                     }
                 }
                 moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
                 return new MoveResult(MoveType.NORMAL);
-            }/*else if(newX + newY == x0 + y0 &&) {
-                moveCounter.setMoveCounter(moveCounter.getMoveCounter() + 1);
-                return new MoveResult(MoveType.NORMAL);
-            }*/
-        }
-
-
+            }
+        }*/
         return new MoveResult(MoveType.NONE);
     }
 
@@ -222,6 +289,7 @@ public class CheckersApp extends Application {
                     board[toBoard(otherPiece.getOldX())][toBoard(otherPiece.getOldY())].setPiece(null);
                     pieceGroup.getChildren().remove(otherPiece);
                     break;
+
                 case TRANSFORM:
                     piece.move(newX, newY);
                     board[x0][y0].setPiece(null);
